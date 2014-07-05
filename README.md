@@ -32,8 +32,8 @@ Log Format
                         Round number,
                         Number of combo sticks,
                         Number of riichi sticks,
-                        ?,
-                        ?,
+                        First dice minus one,
+                        Second dice minus one,
                         Dora indicator.
  - ten              List of scores for each player     
  - oya              Dealer
