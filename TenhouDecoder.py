@@ -2,26 +2,7 @@
 
 import xml.etree.ElementTree as etree
 import urllib.parse
-
-class Data:
-    @property
-    def data(self):
-        def convert(obj, convert):
-            if isinstance(obj, Data):
-                return obj.data
-            elif isinstance(obj, str):
-                return obj
-            elif isinstance(obj, dict):
-                return dict((k, convert(v, convert)) for (k, v) in obj.items())
-            else:
-                try:
-                    return list(convert(child, convert) for child in obj)
-                except:
-                    return obj
-        return dict((k, convert(v, convert)) for (k, v) in self.__dict__.items())
-
-    def __repr__(self):
-        return self.data.__repr__()
+from Data import Data
 
 class Tile(Data, int):
     UNICODE_TILES = """
@@ -40,8 +21,7 @@ class Tile(Data, int):
         wd gd rd
     """.split()
 
-    @property
-    def data(self):
+    def asdata(self, convert = None):
         return self.TILES[self // 4] + str(self % 4)
         
 class Player(Data):
@@ -97,6 +77,11 @@ class Meld(Data):
         base = baseAndCalled // 4
         self.type = "kan"
         self.tiles = Tile(4 * base), Tile(1 + 4 * base), Tile(2 + 4 * base), Tile(3 + 4 * base)
+
+    def decodeNuki(self, data):
+        del self.fromPlayer
+        self.type = "nuki"
+        self.tiles = Tile(data >> 8)
 
 class Event(Data):
     def __init__(self, events):
@@ -178,7 +163,7 @@ class Game(Data):
         self.rounds.append(self.round)
         name, combo, riichi, d0, d1, dora = self.decodeList(data["seed"])
         self.round.round = self.ROUND_NAMES[name], combo, riichi
-        self.round.hands = tuple(self.decodeList(data[hand], Tile) for hand in self.HANDS if hand in data)
+        self.round.hands = tuple(self.decodeList(data[hand], Tile) for hand in self.HANDS if hand in data and data[hand])
         self.round.dealer = int(data["oya"])
         self.round.events = []
         self.round.agari = []
@@ -209,6 +194,9 @@ class Game(Data):
         agari.machi = self.decodeList(data["machi"], Tile)
         if "m" in data:
             agari.melds = self.decodeList(data["m"], Meld.decode)
+            agari.closed = all(not hasattr(meld, "fromPlayer") for meld in agari.melds)
+        else:
+            agari.closed = True
         if "dorahaiUra" in data:
             agari.uradora = self.decodeList(data["uradoraHai"], Tile)
         if agari.type == "RON":
@@ -255,5 +243,4 @@ if __name__=='__main__':
     for path in sys.argv[1:]:
         game = Game()
         game.decode(open(path))
-        data = game.data
-        yaml.dump(data, sys.stdout, default_flow_style=False, allow_unicode=True)
+        yaml.dump(game.asdata(), sys.stdout, default_flow_style=False, allow_unicode=True)
