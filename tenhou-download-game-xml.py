@@ -73,7 +73,6 @@ for sol_file in sol_files:
     slength = Struct('>H')
     stype = Struct('>B')
     vlength = Struct('>H')
-    type6length = Struct('>B')
     while o < len(data) - 1:
         l, = slength.unpack_from(data, o)
         o += 2
