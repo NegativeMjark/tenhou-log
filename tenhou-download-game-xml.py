@@ -71,18 +71,29 @@ for sol_file in sol_files:
     assert mjinfo == b'\0\x06mjinfo'
     assert padding == 0
     slength = Struct('>H')
-    typeslength = Struct('>BH')
-    while o < len(data):
+    stype = Struct('>B')
+    vlength = Struct('>H')
+    type6length = Struct('>B')
+    while o < len(data) - 1:
         l, = slength.unpack_from(data, o)
         o += 2
         name = data[o:o+l]
         o += l
-        t, l = typeslength.unpack_from(data, o)
-        o += 3
-        if t != 2:
-            print("Unknown type {}".format(t))
-        value = data[o:o+l]
-        o += l + 1 # There is a trailing null byte
+        t, = stype.unpack_from(data, o)
+        o += stype.size
+        if t == 2:
+            l, = vlength.unpack_from(data, o)
+            o += vlength.size
+            value = data[o:o+l]
+            o += l + 1 # There is a trailing null byte
+        elif t == 6:
+            value = ''
+            o += 1 # There is a trailing null byte here too
+        elif t == 1:
+            value = ''
+            o += 2 # There's another byte here but we don't care about it.
+        else:
+            print("Unknown type {} at o={} (hex {})".format(t, o, hex(o)))
         if name == b'logstr':
             loglines = filter(None, value.split(b'\n'))
 
