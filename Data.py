@@ -1,5 +1,3 @@
-import collections
-
 def asdata(obj, asdata):
     if isinstance(obj, Data):
         return obj.asdata(asdata)
