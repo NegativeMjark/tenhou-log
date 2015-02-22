@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import TenhouDecoder
 import collections
 from Data import Data
