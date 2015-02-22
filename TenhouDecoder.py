@@ -208,6 +208,7 @@ class Game(Data):
         self.round.dealer = int(data["oya"])
         self.round.events = []
         self.round.agari = []
+        self.round.ryuukyoku = False
         Dora(self.round.events).tile = Tile(dora)
 
     def tagN(self, tag, data):
@@ -220,6 +221,11 @@ class Game(Data):
 
     def tagDORA(self, tag, data):
         Dora(self.round.events).tile = int(data["hai"])
+
+    def tagRYUUKYOKU(self, tag, data):
+        self.round.ryuukyoku = True
+        if 'owari' in data:
+            self.owari = data['owari']
 
     def tagAGARI(self, tag, data):
         agari = Agari()
@@ -247,6 +253,8 @@ class Game(Data):
             agari.yaku = dict((self.YAKU[yaku],han) for yaku,han in zip(yakuList[::2], yakuList[1::2]))
         elif "yakuman" in data:
             agari.yakuman = tuple(self.YAKU[yaku] for yaku in self.decodeList(data["yakuman"]))
+        if 'owari' in data:
+            self.owari = data['owari']
 
     @staticmethod
     def default(self, tag, data):
