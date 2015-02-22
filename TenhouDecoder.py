@@ -111,22 +111,63 @@ class Game(Data):
     NAMES = "n0,n1,n2,n3".split(",")
     HANDS = "hai0,hai1,hai2,hai3".split(",")
     ROUND_NAMES = "東1,東2,東3,東4,南1,南2,南3,南4,西1,西2,西3,西4,北1,北2,北3,北4".split(",")
-    YAKU = """
-        tsumo           riichi          ippatsu         chankan 
-        rinshan         haitei          houtei          pinfu   
-        tanyao          ippeiko         fanpai0         fanpai1 
-        fanpai2         fanpai3         fanpai4         fanpai5 
-        fanpai6         fanpai7         yakuhai0        yakuhai1 
-        yakuhai2        daburi          chiitoi         chanta
-        itsuu           sanshokudoujin  sanshokudou     sankantsu
-        toitoi          sanankou        shousangen      honrouto
-        ryanpeikou      junchan         honitsu         chinitsu
-        renhou          tenhou          chihou          daisangen
-        suuankou        suuankou        tsuiisou        ryuuiisou
-        chinrouto       chuurenpooto    chuurenpooto    kokushi
-        kokushi         daisuushi       shousuushi      suukantsu
-        dora            uradora         akadora
-    """.split()
+    YAKU = (
+            'mentsumo',
+            'riichi',
+            'ippatsu',
+            'chankan',
+            'rinshan kaihou',
+            'haitei raoyue',
+            'houtei raoyui',
+            'pinfu',
+            'tanyao',
+            'iipeiko',
+            'ton',
+            'nan',
+            'xia',
+            'pei',
+            'ton',
+            'nan',
+            'xia',
+            'pei',
+            'haku',
+            'hatsu',
+            'chun',
+            'daburu riichi',
+            'chiitoitsu',
+            'chanta',
+            'ittsu',
+            'sanshoku doujun',
+            'sanshoku doukou',
+            'sankantsu',
+            'toitoi',
+            'sanankou',
+            'shousangen',
+            'honroutou',
+            'ryanpeikou',
+            'junchan',
+            'honitsu',
+            'chinitsu',
+            'renhou',
+            'tenhou',
+            'chihou',
+            'daisangen',
+            'suuankou',
+            'suuankou tanki',
+            'tsuuiisou',
+            'ryuuiisou',
+            'chinroutou',
+            'chuuren pouto',
+            'chuuren pouto 9-wait',
+            'kokushi musou',
+            'kokushi musou 13-wait',
+            'daisuushi',
+            'shousuushi',
+            'suukantsu',
+            'dora',
+            'akadora',
+            'uradora',
+            )
     LIMITS=",mangan,haneman,baiman,sanbaiman,yakuman".split(",")
 
     TAGS = {}
