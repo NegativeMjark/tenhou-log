@@ -179,7 +179,10 @@ class Game(Data):
     def tagUN(self, tag, data):
         if "dan" in data:
             for name in self.NAMES:
-                if name in data:
+                # An empty name, along with sex C, rank 0 and rate 1500 are
+                # used as placeholders in the fourth player fields in
+                # three-player games
+                if data[name]:
                     player = Player()
                     player.name = urllib.parse.unquote(data[name])
                     self.players.append(player)
