@@ -250,7 +250,7 @@ class Game(Data):
             agari.fromPlayer = int(data["fromWho"])
         if "yaku" in data:
             yakuList = self.decodeList(data["yaku"])
-            agari.yaku = dict((self.YAKU[yaku],han) for yaku,han in zip(yakuList[::2], yakuList[1::2]))
+            agari.yaku = tuple((self.YAKU[yaku],han) for yaku,han in zip(yakuList[::2], yakuList[1::2]))
         elif "yakuman" in data:
             agari.yakuman = tuple(self.YAKU[yaku] for yaku in self.decodeList(data["yakuman"]))
         if 'owari' in data:
