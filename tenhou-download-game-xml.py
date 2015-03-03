@@ -63,36 +63,46 @@ for sol_file in sol_files:
     print("Reading Flash state file: {}".format(sol_file))
     with open(sol_file, 'rb') as f:
         data = f.read()
+    # What follows is a limited parser for Flash Local Shared Object files -
+    # a more complete implementation may be found at:
+    # https://pypi.python.org/pypi/PyAMF
     header = Struct('>HI10s8sI')
     magic, objlength, magic2, mjinfo, padding = header.unpack_from(data)
-    o = header.size
+    offset = header.size
     assert magic == 0xbf
     assert magic2 == b'TCSO\0\x04\0\0\0\0'
     assert mjinfo == b'\0\x06mjinfo'
     assert padding == 0
-    slength = Struct('>H')
-    stype = Struct('>B')
-    vlength = Struct('>H')
-    while o < len(data) - 1:
-        l, = slength.unpack_from(data, o)
-        o += 2
-        name = data[o:o+l]
-        o += l
-        t, = stype.unpack_from(data, o)
-        o += stype.size
-        if t == 2:
-            l, = vlength.unpack_from(data, o)
-            o += vlength.size
-            value = data[o:o+l]
-            o += l + 1 # There is a trailing null byte
-        elif t == 6:
-            value = ''
-            o += 1 # There is a trailing null byte here too
-        elif t == 1:
-            value = ''
-            o += 2 # There's another byte here but we don't care about it.
+    ushort = Struct('>H')
+    ubyte = Struct('>B')
+    while offset < len(data):
+        length, = ushort.unpack_from(data, offset)
+        offset += ushort.size
+        name = data[offset:offset+length]
+        offset += length
+        amf0_type, = ubyte.unpack_from(data, offset)
+        offset += ubyte.size
+        # Type 2: UTF-8 String, prefixed with 2-byte length
+        if amf0_type == 2:
+            length, = ushort.unpack_from(data, offset)
+            offset += ushort.size
+            value = data[offset:offset+length]
+            offset += length
+        # Type 6: Undefined
+        elif amf0_type == 6:
+            value = None
+        # Type 1: Boolean
+        elif amf0_type == 1:
+            value = bool(data[offset])
+            offset += 1
+        # Other types from the AMF0 specification are not implemented, as they
+        # have not been observed in mjinfo.sol files. If required, see
+        # http://download.macromedia.com/pub/labs/amf/amf0_spec_121207.pdf
         else:
-            print("Unknown type {} at o={} (hex {})".format(t, o, hex(o)))
+            print("Unimplemented AMF0 type {} at offset={} (hex {})".format(amf0_type, offset, hex(offset)))
+        trailer_byte = data[offset]
+        assert trailer_byte == 0
+        offset += 1
         if name == b'logstr':
             loglines = filter(None, value.split(b'\n'))
 

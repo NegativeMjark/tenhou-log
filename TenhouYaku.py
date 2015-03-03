@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import TenhouDecoder
 import collections
 from Data import Data
@@ -9,6 +11,7 @@ class YakuCounter(Data):
         self.hands = collections.Counter()
         self.closed = YakuHanCounter(collections.Counter(), collections.Counter())
         self.opened = YakuHanCounter(collections.Counter(), collections.Counter())
+        self.all = YakuHanCounter(collections.Counter(), collections.Counter())
 
     def addGame(self, game):
         for round in game.rounds:
@@ -20,11 +23,14 @@ class YakuCounter(Data):
     
     def addAgari(self, agari):
         counterYaku, counterHan = self.closed if agari.closed else self.opened
+        allCounterYaku, allCounterHan = self.all
         self.hands["closed" if agari.closed else "opened"] += 1
         if hasattr(agari, 'yaku'):
             for yaku, han in agari.yaku.items():
                 counterYaku[yaku] += 1
                 counterHan[yaku] += han
+                allCounterYaku[yaku] += 1
+                allCounterHan[yaku] += han
 
 if __name__ == '__main__':
     import sys

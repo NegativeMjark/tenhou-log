@@ -111,22 +111,72 @@ class Game(Data):
     NAMES = "n0,n1,n2,n3".split(",")
     HANDS = "hai0,hai1,hai2,hai3".split(",")
     ROUND_NAMES = "東1,東2,東3,東4,南1,南2,南3,南4,西1,西2,西3,西4,北1,北2,北3,北4".split(",")
-    YAKU = """
-        tsumo           riichi          ippatsu         chankan 
-        rinshan         haitei          houtei          pinfu   
-        tanyao          ippeiko         fanpai0         fanpai1 
-        fanpai2         fanpai3         fanpai4         fanpai5 
-        fanpai6         fanpai7         yakuhai0        yakuhai1 
-        yakuhai2        daburi          chiitoi         chanta
-        itsuu           sanshokudoujin  sanshokudou     sankantsu
-        toitoi          sanankou        shousangen      honrouto
-        ryanpeikou      junchan         honitsu         chinitsu
-        renhou          tenhou          chihou          daisangen
-        suuankou        suuankou        tsuiisou        ryuuiisou
-        chinrouto       chuurenpooto    chuurenpooto    kokushi
-        kokushi         daisuushi       shousuushi      suukantsu
-        dora            uradora         akadora
-    """.split()
+    YAKU = (
+            # 一飜
+            'mentsumo',        # 門前清自摸和
+            'riichi',          # 立直
+            'ippatsu',         # 一発
+            'chankan',         # 槍槓
+            'rinshan kaihou',  # 嶺上開花
+            'haitei raoyue',   # 海底摸月
+            'houtei raoyui',   # 河底撈魚
+            'pinfu',           # 平和
+            'tanyao',          # 断幺九
+            'iipeiko',         # 一盃口
+            # seat winds
+            'ton',             # 自風 東
+            'nan',             # 自風 南
+            'xia',             # 自風 西
+            'pei',             # 自風 北
+            # round winds
+            'ton',             # 場風 東
+            'nan',             # 場風 南
+            'xia',             # 場風 西
+            'pei',             # 場風 北
+            'haku',            # 役牌 白
+            'hatsu',           # 役牌 發
+            'chun',            # 役牌 中
+            # 二飜
+            'daburu riichi',   # 両立直
+            'chiitoitsu',      # 七対子
+            'chanta',          # 混全帯幺九
+            'ittsu',           # 一気通貫
+            'sanshoku doujun', # 三色同順
+            'sanshoku doukou', # 三色同刻
+            'sankantsu',       # 三槓子
+            'toitoi',          # 対々和
+            'sanankou',        # 三暗刻
+            'shousangen',      # 小三元
+            'honroutou',       # 混老頭
+            # 三飜
+            'ryanpeikou',      # 二盃口
+            'junchan',         # 純全帯幺九
+            'honitsu',         # 混一色
+            # 六飜
+            'chinitsu',        # 清一色
+            # 満貫
+            'renhou',          # 人和
+            # 役満
+            'tenhou',                # 天和
+            'chihou',                # 地和
+            'daisangen',             # 大三元
+            'suuankou',              # 四暗刻
+            'suuankou tanki',        # 四暗刻単騎
+            'tsuuiisou',             # 字一色
+            'ryuuiisou',             # 緑一色
+            'chinroutou',            # 清老頭
+            'chuuren pouto',         # 九蓮宝燈
+            'chuuren pouto 9-wait',  # 純正九蓮宝燈
+            'kokushi musou',         # 国士無双
+            'kokushi musou 13-wait', # 国士無双１３面
+            'daisuushi',             # 大四喜
+            'shousuushi',            # 小四喜
+            'suukantsu',             # 四槓子
+            # 懸賞役
+            'dora',    # ドラ
+            'uradora', # 裏ドラ
+            'akadora', # 赤ドラ
+            )
     LIMITS=",mangan,haneman,baiman,sanbaiman,yakuman".split(",")
 
     TAGS = {}
@@ -138,7 +188,10 @@ class Game(Data):
     def tagUN(self, tag, data):
         if "dan" in data:
             for name in self.NAMES:
-                if name in data:
+                # An empty name, along with sex C, rank 0 and rate 1500 are
+                # used as placeholders in the fourth player fields in
+                # three-player games
+                if data[name]:
                     player = Player()
                     player.name = urllib.parse.unquote(data[name])
                     self.players.append(player)
@@ -167,6 +220,7 @@ class Game(Data):
         self.round.dealer = int(data["oya"])
         self.round.events = []
         self.round.agari = []
+        self.round.ryuukyoku = False
         Dora(self.round.events).tile = Tile(dora)
 
     def tagN(self, tag, data):
@@ -179,6 +233,11 @@ class Game(Data):
 
     def tagDORA(self, tag, data):
         Dora(self.round.events).tile = int(data["hai"])
+
+    def tagRYUUKYOKU(self, tag, data):
+        self.round.ryuukyoku = True
+        if 'owari' in data:
+            self.owari = data['owari']
 
     def tagAGARI(self, tag, data):
         agari = Agari()
@@ -203,9 +262,11 @@ class Game(Data):
             agari.fromPlayer = int(data["fromWho"])
         if "yaku" in data:
             yakuList = self.decodeList(data["yaku"])
-            agari.yaku = dict((self.YAKU[yaku],han) for yaku,han in zip(yakuList[::2], yakuList[1::2]))
+            agari.yaku = tuple((self.YAKU[yaku],han) for yaku,han in zip(yakuList[::2], yakuList[1::2]))
         elif "yakuman" in data:
             agari.yakuman = tuple(self.YAKU[yaku] for yaku in self.decodeList(data["yakuman"]))
+        if 'owari' in data:
+            self.owari = data['owari']
 
     @staticmethod
     def default(self, tag, data):
