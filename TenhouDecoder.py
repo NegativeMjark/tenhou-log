@@ -238,6 +238,9 @@ class Game(Data):
         self.round.ryuukyoku = True
         if 'owari' in data:
             self.owari = data['owari']
+        # For special ryuukyoku types, set to string ID rather than boolean
+        if 'type' in data:
+            self.round.ryuukyoku = data['type']
 
     def tagAGARI(self, tag, data):
         agari = Agari()
