@@ -183,7 +183,9 @@ class Game(Data):
     
     def tagGO(self, tag, data):
         self.gameType = data["type"]
-        self.lobby = data["lobby"]
+        # The <GO lobby=""/> attribute was introduced at some point between
+        # 2010 and 2012:
+        self.lobby = data.get("lobby")
 
     def tagUN(self, tag, data):
         if "dan" in data:
