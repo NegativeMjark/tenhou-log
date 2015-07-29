@@ -223,6 +223,7 @@ class Game(Data):
         self.round.events = []
         self.round.agari = []
         self.round.ryuukyoku = False
+        self.round.ryuukyoku_tenpai = None
         Dora(self.round.events).tile = Tile(dora)
 
     def tagN(self, tag, data):
@@ -243,6 +244,11 @@ class Game(Data):
         # For special ryuukyoku types, set to string ID rather than boolean
         if 'type' in data:
             self.round.ryuukyoku = data['type']
+        if self.round.ryuukyoku is True or self.round.ryuukyoku == "nm":
+            tenpai = self.round.ryuukyoku_tenpai = []
+            for index, attr_name in enumerate(self.HANDS):
+                if attr_name in data:
+                    tenpai.append(index)
 
     def tagAGARI(self, tag, data):
         agari = Agari()
