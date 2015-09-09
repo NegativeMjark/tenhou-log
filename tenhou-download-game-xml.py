@@ -6,6 +6,7 @@ from optparse import OptionParser
 from struct import Struct
 from urllib.parse import parse_qs
 from urllib.request import urlopen
+from urllib.error import HTTPError
 import struct
 import codecs
 
@@ -114,7 +115,13 @@ for sol_file in sol_files:
             print("Game {} already downloaded".format(logname))
         else:
             print("Downloading game {}".format(logname))
-            resp = urlopen('http://e.mjv.jp/0/log/?' + logname)
-            data = resp.read()
-            with open(target_fname, 'wb') as f:
-                f.write(data)
+            try:
+                resp = urlopen('http://e.mjv.jp/0/log/?' + logname)
+                data = resp.read()
+                with open(target_fname, 'wb') as f:
+                    f.write(data)
+            except HTTPError as e:
+                if e.code == 404:
+                    print("Could not download game {}. Is the game still in progress?".format(logname))
+                else:
+                    raise
