@@ -183,7 +183,9 @@ class Game(Data):
     
     def tagGO(self, tag, data):
         self.gameType = data["type"]
-        self.lobby = data["lobby"]
+        # The <GO lobby=""/> attribute was introduced at some point between
+        # 2010 and 2012:
+        self.lobby = data.get("lobby")
 
     def tagUN(self, tag, data):
         if "dan" in data:
@@ -221,6 +223,7 @@ class Game(Data):
         self.round.events = []
         self.round.agari = []
         self.round.ryuukyoku = False
+        self.round.ryuukyoku_tenpai = None
         Dora(self.round.events).tile = Tile(dora)
 
     def tagN(self, tag, data):
@@ -238,6 +241,14 @@ class Game(Data):
         self.round.ryuukyoku = True
         if 'owari' in data:
             self.owari = data['owari']
+        # For special ryuukyoku types, set to string ID rather than boolean
+        if 'type' in data:
+            self.round.ryuukyoku = data['type']
+        if self.round.ryuukyoku is True or self.round.ryuukyoku == "nm":
+            tenpai = self.round.ryuukyoku_tenpai = []
+            for index, attr_name in enumerate(self.HANDS):
+                if attr_name in data:
+                    tenpai.append(index)
 
     def tagAGARI(self, tag, data):
         agari = Agari()
