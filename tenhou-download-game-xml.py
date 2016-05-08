@@ -56,6 +56,10 @@ sol_files.extend(glob.glob(os.path.join(
 sol_files.extend(glob.glob(os.path.join(
     os.path.expanduser('~'),
     '.macromedia/Flash_Player/#SharedObjects/*/mjv.jp/mjinfo.sol')))
+# mac os
+sol_files.extend(glob.glob(os.path.join(
+    os.path.expanduser('~'),
+    'Library/Application Support/Google/Chrome/Default/Pepper Data/Shockwave Flash/WritableRoot/#SharedObjects/*/mjv.jp/mjinfo.sol')))
 
 if not os.path.exists(opts.directory):
     os.makedirs(opts.directory)
